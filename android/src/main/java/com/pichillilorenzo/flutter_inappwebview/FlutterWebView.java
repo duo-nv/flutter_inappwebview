@@ -23,6 +23,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.platform.PlatformView;
+import io.flutter.app.FlutterApplication;
 
 import static io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import static io.flutter.plugin.common.MethodChannel.Result;
@@ -53,7 +54,15 @@ public class FlutterWebView implements PlatformView, MethodCallHandler  {
     InAppWebViewOptions options = new InAppWebViewOptions();
     options.parse(initialOptions);
 
-    webView = new InAppWebView(registrar, context, this, id, options, containerView);
+    Context activityContext = context;
+    Context appContext = context.getApplicationContext();
+    if (appContext instanceof FlutterApplication) {
+      Activity currentActivity = ((FlutterApplication) appContext).getCurrentActivity();
+      if (currentActivity != null) {
+        activityContext = currentActivity;
+      }
+    }
+    webView = new InAppWebView(registrar, activityContext, this, id, options, containerView);
     displayListenerProxy.onPostWebViewInitialization(displayManager);
 
     webView.prepare();
